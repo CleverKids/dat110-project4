@@ -1,7 +1,7 @@
 package no.hvl.dat110.aciotdevice.client;
 
 import com.google.gson.Gson;
-import com.google.gson.JsonParser;
+import com.google.gson.JsonSyntaxException;
 
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
@@ -52,9 +52,10 @@ public class RestClient {
 	public AccessCode doGetAccessCode() {
 
 		AccessCode code = null;
+		
+		// TODO: implement a HTTP GET on the service to get current access code
+		OkHttpClient client = new OkHttpClient();
 
-		// implements a HTTP GET on the service to get current access code
-		OkHttpClient okClient = new OkHttpClient();
 		Gson gson = new Gson();
 
 		Request request = new Request.Builder()
@@ -62,21 +63,16 @@ public class RestClient {
 						.get()
 						.build();
 
-		System.out.println("doGetAccessCode request: ");
 		System.out.println(request);
 
-		try (Response response = okClient.newCall(request).execute()) {
-			System.out.println("response data: ");
-			System.out.println(response.body());
-			String responseBody = response.body().string();
-			System.out.println("ResponseBody: ");
-			System.out.println(responseBody);
-
-			// JsonObject responseAsJSON = JsonParser.parseString(responseBody).getAsJsonObject(); // Testing...
-			code = gson.fromJson(JsonParser.parseString(responseBody), AccessCode.class);
-		} catch (IOException e) {
+		try (Response response = client.newCall(request).execute()) {
+			String body = response.body().string();
+			System.out.println(body);
+			code = gson.fromJson(body, AccessCode.class);
+		} catch (JsonSyntaxException | IOException e) {
 			e.printStackTrace();
 		}
+		
 		return code;
 	}
 }
